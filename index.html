@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrow Target Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .description {
+            height: 30%;
+            
+            padding: 1px;
+            font-size: 1.2em;
+            background-color: #e0e0e0;
+            width: 60%;
+
+            box-sizing: border-box;
+        }
+
+        .controls {
+            margin: 10px;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .shield {
+            width: 100px;
+            height: 150px;
+            margin: 0 5px;
+            border: 2px solid #000;
+            position: relative;
+            background-color: #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+            .shield:hover {
+                cursor: pointer;
+                background-color: #bbb;
+            }
+
+        .target {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            position: absolute;
+            border-radius: 50%;
+            display: none; /* Initially hidden */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="description">
+        <p>В этой игре мишень прячется за одним из щитков.
+        Щелкните по щитку, чтобы стрелок попытался поразить мишень. 
+        Если стрелок промахнется, мишень переместится к соседнему щитку.
+        При правильной игре цель будет поражена не позже, чем через 2(n-2) выстрелов.
+        Введите количество щитков и нажмите кнопку, чтобы начать.</p>
+    </div>
+
+    <div class="controls">
+        <input type="number" id="numShields" min="2" placeholder="Введите число щитков">
+        <button onclick="generateShields()">Генерировать щитки</button>
+    </div>
+
+    <div class="container" id="shieldsContainer">
+        <!-- Щитки будут генерироваться здесь -->
+    </div>
+
+    <p id="result">Выберите щиток, чтобы стрелять!</p>
+
+    <audio id="hitSound" src="explosion.wav" preload="auto"></audio> <!-- Добавлен звук разрыва -->
+
+    <script>
+        let targetPosition = 1; // Начальная позиция мишени
+
+        function generateShields() {
+            const numShields = parseInt(document.getElementById('numShields').value);
+            const container = document.getElementById('shieldsContainer');
+            container.innerHTML = ''; // Очистить предыдущие щитки
+            targetPosition = Math.floor(Math.random() * numShields) + 1; // Случайная начальная позиция мишени
+
+            for (let i = 1; i <= numShields; i++) {
+                const shield = document.createElement('div');
+                shield.className = 'shield';
+                shield.onclick = () => shootTarget(i);
+
+                const target = document.createElement('div');
+                target.className = 'target';
+                target.id = `target${i}`;
+
+                shield.appendChild(target);
+                container.appendChild(shield);
+            }
+        }
+
+        function shootTarget(shieldNumber) {
+            const resultElement = document.getElementById('result');
+            const hitSound = document.getElementById('hitSound');
+
+            if (shieldNumber === targetPosition) {
+                resultElement.textContent = 'Попали! Мишень поражена.';
+                document.getElementById(`target${targetPosition}`).style.display = 'block';
+                hitSound.play(); // Воспроизведение звука при попадании
+            } else {
+                resultElement.textContent = 'Мимо! Мишень перемещается.';
+                moveTarget(shieldNumber);
+            }
+        }
+
+        function moveTarget(shieldNumber) {
+            document.getElementById(`target${targetPosition}`).style.display = 'none';
+
+            if (shieldNumber < targetPosition) {
+                targetPosition--; // Переместить мишень влево
+            } else {
+                targetPosition++; // Переместить мишень вправо
+            }
+        }
+    </script>
+
+</body>
+</html>
